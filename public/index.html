@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,6 +103,15 @@
         let timerId = null;
         let audio = null;
 
+        const musicPlaylist = [
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755335983/music_punch_m4bfxr.mp3', startTime: 0 },
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755430576/PeeMuay_lbwnl5.mp3', startTime: 43 },
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755431470/footfire_npjnae.mp3', startTime: 2 },
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755432951/danceDi_y87sqn.mp3', startTime: 13 },
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755431159/yamal_brz3ih.mp3', startTime: 6 },
+        { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755433678/boatBanana_wdcbfn.mp3', startTime: 12 },
+    ];
+
         const ws = new WebSocket('ws://192.168.137.1:8080');
 
         ws.onopen = () => {
@@ -130,7 +140,7 @@
                     playMusic();
                 } else if (message === 'STOP_MUSIC') {
                     stopMusic();
-                    statusMessage.textContent = "Music stopped.";
+                    statusMessage.textContent = "Reset Score.";
                     statusMessage.style.color = "#6b7280";
                 } else if (message.startsWith('MODE_CHANGED')) {
                     stopMusic();
@@ -153,9 +163,14 @@
             statusMessage.style.color = "#ef4444";
         };
 
+        function getRandomMusicData() {
+        const randomIndex = Math.floor(Math.random() * musicPlaylist.length);
+        return musicPlaylist[randomIndex];
+    }
+
         async function playMusic() {
             try {
-                const musicUrl = 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755335983/music_punch_m4bfxr.mp3';
+                const musicData = getRandomMusicData();
                 
                 if (audio) {
                     audio.pause();
@@ -163,7 +178,16 @@
                     clearTimeout(timerId);
                 }
 
-                audio = new Audio(musicUrl);
+                audio = new Audio(musicData.url);
+
+                await new Promise((resolve) => {
+                audio.addEventListener('loadedmetadata', () => {
+                    resolve();
+                });
+            });
+
+            audio.currentTime = musicData.startTime;
+
                 await audio.play();
                 statusMessage.textContent = "Session started! Get ready to punch!";
                 statusMessage.style.color = "#fbbf24";
