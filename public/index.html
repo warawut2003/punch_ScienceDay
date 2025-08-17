@@ -14,8 +14,6 @@
 <body>
     <!-- Background Elements -->
     <div class="background-pattern"></div>
-    <div class="thai-ornament top-left"></div>
-    <div class="thai-ornament top-right"></div>
     
     <div class="container">
         <!-- Header Section -->
@@ -37,7 +35,7 @@
                 <p class="ready-text">Ready to start the punching game?</p>
             </div>
             <div class="status-container">
-                <div class="status-icon">⚡</div>
+                <div class="status-icon" id="status-icon">⚡</div>
                 <p id="status-message" class="status-text">Current Mode: Speed Training</p>
             </div>
         </div>
@@ -50,7 +48,6 @@
                     <span class="english-label">SCORE</span>
                 </div>
                 <div class="score-display" id="punch-score">0</div>
-                <div class="stat-decoration"></div>
             </div>
             
             <div class="stat-divider">
@@ -63,7 +60,6 @@
                     <span class="english-label">TIME</span>
                 </div>
                 <div class="timer-display" id="game-timer">00:00</div>
-                <div class="stat-decoration"></div>
             </div>
         </div>
 
@@ -75,27 +71,13 @@
                     <span class="thai-btn">เปลี่ยนโหมด</span>
                     <span class="english-btn">Change Mode</span>
                 </span>
-                <div class="btn-glow"></div>
             </button>
         </div>
-
-        <!-- Decorative Elements -->
-        <div class="decorative-elements">
-            <div class="thai-pattern left"></div>
-            <div class="thai-pattern right"></div>
-        </div>
     </div>
-
-    <!-- Floating Elements -->
-    <div class="floating-elements">
-        <div class="floating-glove glove-1">🥊</div>
-        <div class="floating-glove glove-2">🥊</div>
-        <div class="floating-temple temple-1">🏛️</div>
-    </div>
-
     <script>
         const modeBtn = document.getElementById('modeBtn');
         const statusMessage = document.getElementById('status-message');
+        const statusIcon = document.getElementById('status-icon');
         const punchScoreDisplay = document.getElementById('punch-score');
         const gameTimerDisplay = document.getElementById('game-timer');
 
@@ -112,7 +94,17 @@
         { url: 'https://res.cloudinary.com/dxxkobgps/video/upload/v1755433678/boatBanana_wdcbfn.mp3', startTime: 12 },
     ];
 
-        const ws = new WebSocket('ws://192.168.137.1:8080');
+        function updateModeDisplay(mode) {
+            if (mode === 'strength') {
+                statusIcon.textContent = '💪';
+                statusMessage.textContent = 'Current Mode: Strength Training';
+            } else {
+                statusIcon.textContent = '⚡';
+                statusMessage.textContent = 'Current Mode: Speed Training';
+            }
+        }
+
+        const ws = new WebSocket('ws://192.168.1.13:8080');
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
@@ -146,6 +138,7 @@
                     stopMusic();
                     const newMode = message.split(' ')[1];
                     currentMode = newMode;
+                    updateModeDisplay(newMode);
                     statusMessage.textContent = `Current Mode: ${newMode.charAt(0).toUpperCase() + newMode.slice(1)} Training`;
                 }
             }
@@ -220,6 +213,9 @@
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(`CHANGE_MODE ${newMode}`);
                 console.log(`Sent mode change to server: ${newMode}`);
+
+                currentMode = newMode;
+                updateModeDisplay(newMode);
                 
                 // Add click animation
                 modeBtn.classList.add('clicked');
@@ -232,6 +228,8 @@
         // Add floating animation on load
         window.addEventListener('load', () => {
             document.body.classList.add('loaded');
+
+            updateModeDisplay(currentMode);
         });
     </script>
 </body>
