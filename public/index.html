@@ -95,12 +95,56 @@
     ];
 
         function updateModeDisplay(mode) {
+            // ลบ class เดิมออกก่อน
+            statusIcon.classList.remove('speed-mode', 'strength-mode');
+            statusMessage.classList.remove('speed-mode', 'strength-mode');
+            gameTimerDisplay.classList.remove('disabled');
+
             if (mode === 'strength') {
+                // โหมดวัดพลัง - แสดงไอคอนกำลัง และปิดการใช้งานเวลา
                 statusIcon.textContent = '💪';
+                statusIcon.classList.add('strength-mode');
                 statusMessage.textContent = 'Current Mode: Strength Training';
+                statusMessage.classList.add('strength-mode');
+                
+                // ปิดการใช้งานเวลาและแสดงขีด
+                gameTimerDisplay.textContent = '∞';
+                gameTimerDisplay.classList.add('disabled');
+                gameTimerDisplay.title = 'Timer disabled in Strength mode';
             } else {
+                // โหมดวัดความเร็ว - แสดงไอคอนฟ้าผ่า และเปิดการใช้งานเวลา
                 statusIcon.textContent = '⚡';
+                statusIcon.classList.add('speed-mode');
                 statusMessage.textContent = 'Current Mode: Speed Training';
+                statusMessage.classList.add('speed-mode');
+                
+                // เปิดการใช้งานเวลา
+                gameTimerDisplay.textContent = '00:00';
+                gameTimerDisplay.title = 'Training timer';
+            }
+        }
+
+        function updateTimerDisplay(timeInSeconds) {
+            if (currentMode === 'speed') {
+                const minutes = Math.floor(timeInSeconds / 60);
+                const seconds = timeInSeconds % 60;
+                gameTimerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                gameTimerDisplay.classList.remove('disabled');
+            } else {
+                // ในโหมด strength ให้แสดง infinity symbol
+                gameTimerDisplay.textContent = '∞';
+                gameTimerDisplay.classList.add('disabled');
+            }
+        }
+
+           function resetDisplay() {
+            punchScoreDisplay.textContent = '0';
+            if (currentMode === 'speed') {
+                gameTimerDisplay.textContent = '00:00';
+                gameTimerDisplay.classList.remove('disabled');
+            } else {
+                gameTimerDisplay.textContent = '∞';
+                gameTimerDisplay.classList.add('disabled');
             }
         }
 
@@ -125,7 +169,6 @@
                     gameTimerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 } else if (data.mode === 'strength') {
                     punchScoreDisplay.textContent = data.score;
-                    gameTimerDisplay.textContent = "--:--";
                 }
             }catch(e){
                 if (message === 'START_MUSIC') {
